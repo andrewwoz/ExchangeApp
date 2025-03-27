@@ -17,7 +17,7 @@ class ObserveSeletedCurrenciesUseCaseImpl: ObserveSelectedCurrenciesUseCase {
     let repeater: RepeatingTimer
     let userDefaultsService: UserDefaultsService
     
-    private let subject = PassthroughSubject<[CurrencyExchangeItem], UserFriendlyError>()
+    private let subject = CurrentValueSubject<[CurrencyExchangeItem]?, UserFriendlyError>(nil)
     private var cancellables = Set<AnyCancellable>()
     
     init(repository: CurrencyExchangeRepository, repeater: RepeatingTimer, userDefaultsService: UserDefaultsService) {
@@ -33,6 +33,7 @@ class ObserveSeletedCurrenciesUseCaseImpl: ObserveSelectedCurrenciesUseCase {
             let ids = (try? self.userDefaultsService.read(FavoriteCurrencies())) ?? []
             guard !ids.isEmpty else {
                 self.subject.send([])
+                self.repeater.stop()
                 return
             }
             
@@ -53,6 +54,7 @@ class ObserveSeletedCurrenciesUseCaseImpl: ObserveSelectedCurrenciesUseCase {
                 self?.repeater.stop()
                 self?.cancellables.removeAll()
             })
+            .compactMap { $0 }
             .eraseToAnyPublisher()
     }
 }
