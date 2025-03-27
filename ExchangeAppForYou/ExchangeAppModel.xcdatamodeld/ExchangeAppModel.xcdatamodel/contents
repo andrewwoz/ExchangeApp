@@ -5,5 +5,6 @@
         <attribute name="id" optional="YES" attributeType="String"/>
         <attribute name="quote" optional="YES" attributeType="String"/>
         <attribute name="rate" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="type" optional="YES" attributeType="String"/>
     </entity>
 </model>

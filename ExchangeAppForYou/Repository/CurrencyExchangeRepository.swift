@@ -94,6 +94,7 @@ final class CurrencyExchangeRepositoryImpl: CurrencyExchangeRepository {
                 objectToSave.base = item.base
                 objectToSave.quote = item.quote
                 objectToSave.rate = item.rate
+                objectToSave.type = item.type.rawValue
             }
 
             do {
@@ -118,11 +119,12 @@ final class CurrencyExchangeRepositoryImpl: CurrencyExchangeRepository {
                         guard
                             let id = object.id,
                             let base = object.base,
-                            let quote = object.quote
+                            let quote = object.quote,
+                            let type = object.type
                         else { return nil }
 
-                        let type: CurrencyType = id.hasPrefix(CurrencyType.crypto.rawValue) ? .crypto : .fiat
-                        return CurrencyExchangeItem(base: base, quote: quote, rate: object.rate, id: id, type: type)
+                        let currencyType: CurrencyType = type == CurrencyType.crypto.rawValue ? .crypto : .fiat
+                        return CurrencyExchangeItem(base: base, quote: quote, rate: object.rate, id: id, type: currencyType)
                     }
                     promise(.success(items))
                 } catch {
