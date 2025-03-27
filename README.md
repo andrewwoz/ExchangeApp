@@ -97,8 +97,5 @@ Included unit test examples to demonstrate use case testing and dependency injec
 
 - None (uses built-in Apple frameworks only)
 
----
 
-## 📄 License
 
-This project is provided as part of a coding assignment and is not intended for production use.
