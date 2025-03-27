@@ -38,13 +38,11 @@ final class DefaultNetworkingService: NetworkingService {
                 return try request.parse(data: data, response: httpResponse)
             }
             .mapError { error in
-                // Try to cast to R.ErrorType first
                 if let typedError = error as? NetworkingError {
                     return ServiceError<R.ErrorType>.networkError(typedError)
                 } else if let customError = error as? R.ErrorType {
                     return ServiceError.customError(customError)
                 } else {
-                    // Fallback for unknown errors
                     return ServiceError<R.ErrorType>.networkError(.unknown)
                 }
             }
