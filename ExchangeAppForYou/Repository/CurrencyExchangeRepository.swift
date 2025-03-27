@@ -39,7 +39,11 @@ final class CurrencyExchangeRepositoryImpl: CurrencyExchangeRepository {
     }
     
     func search(with term: String) -> AnyPublisher<[CurrencyExchangeItem], GatewayError> {
-        Publishers.Zip(
+        guard !term.isEmpty else {
+            return Just([]).setFailureType(to: GatewayError.self).eraseToAnyPublisher()
+        }
+        
+        return Publishers.Zip(
             fiatGateway.search(with: term),
             cryptoGateway.search(with: term)
         )
