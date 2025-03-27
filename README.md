@@ -4,6 +4,10 @@ This is a SwiftUI mobile application built for the **AHB Mobile Engineer Assignm
 
 Please Note: Rates API is very unstable for free version
 
+Demo
+https://youtube.com/shorts/pPfhyMQneM0?feature=share
+
+
 ---
 
 ## 📌 Features
