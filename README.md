@@ -2,6 +2,8 @@
 
 This is a SwiftUI mobile application built for the **AHB Mobile Engineer Assignment**. It allows users to track real-time exchange rates for selected fiat and crypto currencies with persistent state, offline fallback, and reactive updates.
 
+Please Note: Rates API is very unstable for free version
+
 ---
 
 ## 📌 Features
