@@ -18,16 +18,17 @@ struct MainScreenView: View {
                     ForEach(viewModel.currencies, id: \.universalId) { item in
                         HStack {
                             VStack(alignment: .leading) {
-                                Text("\(item.base) → \(item.quote)")
+                                Text(item.quote.capitalized)
                                     .font(.headline)
-                                Text("Type: \(item.type.rawValue.capitalized)")
+                                Text(item.type.marketType.capitalized)
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
                             Spacer()
-                            Text(String(format: "%.4f", item.rate))
+                            Text("$" + MoneyFormatter.formatMoney(item.rate))
                                 .font(.subheadline)
                         }
+                        .transition(.move(edge: .top).combined(with: .opacity))
                     }
                     .onDelete(perform: delete)
                 }
@@ -46,13 +47,12 @@ struct MainScreenView: View {
                     }
                 }
             }
-            .alert(item: Binding(
-                get: {
-                    viewModel.errorMessage.map { AlertItem(message: $0) }
-                },
-                set: { _ in }
-            )) { alert in
-                Alert(title: Text("Error"), message: Text(alert.message), dismissButton: .default(Text("OK")))
+            .alert(item: $viewModel.alert) { alert in
+                Alert(
+                    title: Text(alert.title),
+                    message: Text(alert.message),
+                    dismissButton: .default(Text("OK"))
+                )
             }
             .navigationDestination(for: AppCoordinator.Route.self) { route in
                 switch route {
@@ -62,24 +62,22 @@ struct MainScreenView: View {
             }
         }
         .onAppear {
-            viewModel.start()
+            viewModel.load()
         }
-        .onChange(of: coordinator.path) { _, newPath in
+        .onChange(of: coordinator.path) { previous, newPath in
             // Refresh on pop
-            viewModel.start()
+            if previous.count > newPath.count {
+                viewModel.load()
+            }
         }
     }
 
     private func delete(at offsets: IndexSet) {
-        for index in offsets {
-            let item = viewModel.currencies[index]
-            viewModel.remove(item)
+        withAnimation {
+            for index in offsets {
+                let item = viewModel.currencies[index]
+                viewModel.remove(item)
+            }
         }
     }
 }
-
-struct AlertItem: Identifiable {
-    let id = UUID()
-    let message: String
-}
-

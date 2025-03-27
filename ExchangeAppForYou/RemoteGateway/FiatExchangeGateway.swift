@@ -28,7 +28,7 @@ struct FiatExchangeGateway: CurrencyExchangeGateway {
             .mapError { _ in GatewayError.failedToLoad }
             .map { result in
                 result.rates.map {
-                    CurrencyExchangeItem(base: "USD", quote: $0.key, rate: Double($0.value), id: $0.key, type: .fiat, isFavorite: nil)
+                    CurrencyExchangeItem(base: "USD", quote: $0.key, rate: 1 / $0.value, id: $0.key, type: .fiat, isFavorite: nil)
                 }
             }
             .eraseToAnyPublisher()

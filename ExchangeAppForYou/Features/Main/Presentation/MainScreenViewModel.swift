@@ -8,12 +8,13 @@
 import Combine
 import SwiftUI
 
+
 @MainActor
 class MainScreenViewModel: ObservableObject {
     @Published var currencies: [CurrencyExchangeItem] = []
-    @Published var errorMessage: String?
+    @Published var alert: AlertItem?
     @Published var isLoading: Bool = false
-
+    
     private let observeUseCase: ObserveSelectedCurrenciesUseCase
     private let deleteUseCase: DeleteCurrencyUseCase
 
@@ -28,7 +29,7 @@ class MainScreenViewModel: ObservableObject {
         self.deleteUseCase = deleteUseCase
     }
 
-    func start() {
+    func load() {
         isLoading = true
         observeToken?.cancel()
         observeToken = nil
@@ -37,7 +38,7 @@ class MainScreenViewModel: ObservableObject {
             .sink(receiveCompletion: { [weak self] completion in
                 self?.isLoading = false
                 if case let .failure(error) = completion {
-                    self?.errorMessage = error.message
+                    self?.alert = AlertItem(title: error.title, message: error.message)
                 }
             }, receiveValue: { [weak self] items in
                 self?.isLoading = false
@@ -49,11 +50,11 @@ class MainScreenViewModel: ObservableObject {
         deleteUseCase.execute(id: item.universalId)
             .sink(receiveCompletion: { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self?.errorMessage = error.message
+                    self?.alert = AlertItem(title: error.title, message: error.message)
                 }
             }, receiveValue: { [weak self] _ in
                 // Restart observing
-                self?.start()
+                self?.load()
             })
             .store(in: &cancellables)
     }

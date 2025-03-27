@@ -20,9 +20,9 @@ struct CurrencySearchView: View {
                     }) {
                         HStack {
                             VStack(alignment: .leading) {
-                                Text("\(item.base) → \(item.quote)")
+                                Text(item.quote.capitalized)
                                     .font(.headline)
-                                Text(item.type.rawValue.capitalized)
+                                Text(item.type.marketType.capitalized)
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -50,11 +50,12 @@ struct CurrencySearchView: View {
             }
         }
         .searchable(text: $viewModel.searchText)
-        .alert(item: Binding(
-            get: { viewModel.errorMessage.map { AlertItem(message: $0) }},
-            set: { _ in  }
-        )) { alert in
-            Alert(title: Text("Error"), message: Text(alert.message), dismissButton: .default(Text("OK")))
+        .alert(item: $viewModel.error) { alert in
+            Alert(
+                title: Text(alert.title),
+                message: Text(alert.message),
+                dismissButton: .default(Text("OK"))
+            )
         }
         .onChange(of: viewModel.shouldDismiss) { _, shouldDismiss in
             if shouldDismiss {

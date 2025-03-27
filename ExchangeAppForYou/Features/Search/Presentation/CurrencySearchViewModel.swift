@@ -12,7 +12,7 @@ import Combine
 class CurrencySearchViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var items: [CurrencyExchangeItem] = []
-    @Published var errorMessage: String?
+    @Published var error: AlertItem?
     @Published var isLoading: Bool = false
     @Published var shouldDismiss: Bool = false
     
@@ -39,13 +39,11 @@ class CurrencySearchViewModel: ObservableObject {
 
         $searchText
             .removeDuplicates()
-            .debounce(for: .milliseconds(300), scheduler: DispatchQueue.main)
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
             .sink { [weak self] query in
                 self?.search(query: query)
             }
             .store(in: &cancellables)
-        
-        fetchAllCurrencies()
     }
 
     func search(query: String) {
@@ -61,7 +59,7 @@ class CurrencySearchViewModel: ObservableObject {
             .handleEvents(receiveCompletion: { [weak self] _ in self?.isLoading = false })
             .sink(receiveCompletion: { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self?.errorMessage = error.message
+                    self?.error = AlertItem(title: error.title, message: error.message)
                 }
             }, receiveValue: { [weak self] result in
                 self?.populateItems(result)
@@ -89,7 +87,7 @@ class CurrencySearchViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self?.errorMessage = error.message
+                    self?.error = AlertItem(title: error.title, message: error.message)
                 }
             }, receiveValue: { [weak self] _ in
                 self?.shouldDismiss = true
@@ -107,7 +105,7 @@ class CurrencySearchViewModel: ObservableObject {
             })
             .sink(receiveCompletion: { [weak self] completion in
                 if case let .failure(error) = completion {
-                    self?.errorMessage = error.message
+                    self?.error = AlertItem(title: error.title, message: error.message)
                 }
             }, receiveValue: { [weak self] result in
                 self?.populateItems(result)

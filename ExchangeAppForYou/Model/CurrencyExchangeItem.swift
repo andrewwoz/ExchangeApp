@@ -10,6 +10,15 @@ import Foundation
 enum CurrencyType: String {
     case crypto
     case fiat
+    
+    var marketType: String {
+        switch self {
+        case .crypto:
+            return "Crypto"
+        case .fiat:
+            return "Forex"
+        }
+    }
 }
 
 struct CurrencyExchangeItem: Equatable {

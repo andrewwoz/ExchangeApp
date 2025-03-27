@@ -39,6 +39,13 @@ class ObserveSeletedCurrenciesUseCaseImpl: ObserveSelectedCurrenciesUseCase {
             
             self.repository.getCurrencies(forIDs: ids)
                 .mapError { _ in UserFriendlyError(title: "Failed to load", message: "Please try again later.") }
+                .tryMap { items in
+                    if items.isEmpty && !ids.isEmpty {
+                        throw UserFriendlyError(title: "No Data", message: "Failed to load your currency pairs and no cache found.\nPlease try again later.")
+                    }
+                    return items
+                }
+                .mapError { $0 as! UserFriendlyError }
                 .sink(receiveCompletion: { completion in
                     if case let .failure(error) = completion {
                         self.subject.send(completion: .failure(error))
