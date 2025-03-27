@@ -22,7 +22,9 @@ class AppCoordinator: ObservableObject {
     private let networkService = DefaultNetworkingService()
 
     private var repository: CurrencyExchangeRepository {
-        let crypto = CryptoExchangeGateway(networkingService: networkService)
+        // Use empty because crypto geteway is emiting to many issues
+        // CryptoExchangeGateway(networkingService: networkService)
+        let crypto = EmptyExchangeGateway()
         let fiat = FiatExchangeGateway(networkingService: networkService)
 
         return CurrencyExchangeRepositoryImpl(
