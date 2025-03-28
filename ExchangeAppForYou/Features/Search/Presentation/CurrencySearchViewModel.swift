@@ -16,11 +16,6 @@ class CurrencySearchViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var shouldDismiss: Bool = false
     
-    private enum SelectionChange: Hashable {
-        case add(String)
-        case remove(String)
-    }
-    
     private var selectionChanges: Set<SelectionChange> = []
 
     private let searchUseCase: SearchCurrenciesUseCase
@@ -69,7 +64,11 @@ class CurrencySearchViewModel: ObservableObject {
 
     func toggleSelection(for item: CurrencyExchangeItem) {
         guard let index = items.firstIndex(where: { $0.universalId == item.universalId }) else { return }
-        items[index].isFavorite?.toggle()
+        if let isFavorite = items[index].isFavorite {
+            items[index].isFavorite = !isFavorite
+        } else {
+            items[index].isFavorite = true
+        }
         
         if items[index].isFavorite == true {
             selectionChanges.insert(.add(item.universalId))
@@ -81,9 +80,7 @@ class CurrencySearchViewModel: ObservableObject {
     }
 
     func saveSelection() {
-        let selectedIds = items.filter { $0.isFavorite == true }.map { $0.universalId }
-
-        saveUseCase.execute(ids: selectedIds)
+        saveUseCase.execute(changes: selectionChanges)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { [weak self] completion in
                 if case let .failure(error) = completion {

@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 protocol SaveSelectedCurrenciesUseCase {
-    func execute(ids: [String]) -> AnyPublisher<[String], UserFriendlyError>
+    func execute(changes: Set<SelectionChange>) -> AnyPublisher<[String], UserFriendlyError>
 }
 
 struct FavoriteCurrencies: UserDefaultsRequest {
@@ -17,13 +17,32 @@ struct FavoriteCurrencies: UserDefaultsRequest {
     let key = "favoriteCurrencies"
 }
 
+enum SelectionChange: Hashable {
+    case add(String)
+    case remove(String)
+}
+
 struct SaveSelectedCurrenciesUseCaseImpl: SaveSelectedCurrenciesUseCase {
     let userDefaults: UserDefaultsService
     
-    func execute(ids: [String]) -> AnyPublisher<[String], UserFriendlyError> {
+    func execute(changes: Set<SelectionChange>) -> AnyPublisher<[String], UserFriendlyError> {
         do {
-            try userDefaults.save(ids, for: FavoriteCurrencies())
-            return Just(ids).setFailureType(to: UserFriendlyError.self).eraseToAnyPublisher()
+            let ids = try userDefaults.read(FavoriteCurrencies()) ?? []
+            
+            let filteredIds = ids.filter { id in
+                !changes.contains(.remove(id)) || changes.contains(.add(id))
+            }
+            
+            let addedIds = changes.compactMap { change in
+                if case .add(let id) = change {
+                    return id
+                }
+                return nil
+            }
+            
+            let favoriteIds = filteredIds + addedIds
+            try userDefaults.save(favoriteIds , for: FavoriteCurrencies())
+            return Just(favoriteIds).setFailureType(to: UserFriendlyError.self).eraseToAnyPublisher()
         } catch {
             return Fail(error: UserFriendlyError(title: "Error", message: error.localizedDescription)).eraseToAnyPublisher()
         }
