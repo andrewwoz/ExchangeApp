@@ -39,6 +39,7 @@ class MainScreenViewModel: ObservableObject {
                 self?.isLoading = false
                 if case let .failure(error) = completion {
                     self?.alert = AlertItem(title: error.title, message: error.message)
+                    self?.currencies = []
                 }
             }, receiveValue: { [weak self] items in
                 self?.isLoading = false
